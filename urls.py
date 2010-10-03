@@ -1,0 +1,10 @@
+# -*- coding: utf-8 -*-
+
+from django.conf.urls.defaults import *
+
+urlpatterns = patterns('',
+	
+	(r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'userauth/login.html'}),
+	(r'^logout/$', 'userauth.views.logout'),
+	
+)
