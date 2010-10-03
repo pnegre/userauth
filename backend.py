@@ -23,6 +23,9 @@ def checkEmail(email,password):
 
 class LiceuBackend:
 	def authenticate(self, username=None, password=None):
+		if not re.match('.*\@esliceu.com',username):
+			username = username + '@esliceu.com'
+			
 		if not checkEmail(username,password):
 			return None
 		
