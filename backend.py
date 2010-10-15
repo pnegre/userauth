@@ -36,8 +36,6 @@ class LiceuBackend:
 			user.set_unusable_password()
 			user.is_staff = False
 			user.is_superuser = False
-			gprofs = Group.objects.get(name='profs_secundaria')
-			user.groups.add(gprofs)
 			user.save()
 			
 		return user
