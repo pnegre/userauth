@@ -1,34 +1,47 @@
-<html>
-
-<head>
-
-<title> Login ES LICEU </title>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" lang="ca"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	
+	<title>Has sortit</title>
+<link rel="stylesheet" id="wp-admin-css" href="/static/userauth/wp-admin.css" type="text/css" media="all">
+<link rel="stylesheet" id="colors-fresh-css" href="/static/userauth/colors-fresh.css" type="text/css" media="all">
+<meta name="robots" content="noindex,nofollow">
 
 
 <style type="text/css">
 
-div {
-	width: 300px;
-	background-color: #EEE;
-	margin-left: auto;
-	margin-right: auto;
-	margin-top: 20px;
-	padding: 20px;
-	border: 1px solid black;
+.login h1 {
+	text-align: center;
+	margin-bottom: 5px;
+}
+
+.error {
+	color: red;
 }
 
 </style>
 
+
+
 </head>
+<body class="login">
+<div id="login"><h1>
+	
+	<img src="/static/userauth/logo_esliceu_alt.png">
+	
+</h1>
 
-<body>
+<form name="loginform" id="loginform" action="{% url django.contrib.auth.views.login %}" method="post">
+	<p> Has sortit de la Intranet.</p>
+	<br><br>
+	<p> Si vols tornar a entrar, fes clic <a href="/auth/login">aquí</a></p>
+</form>
 
-	<div>
 
-		Has sortit de l'aplicació.
-
-		Torna a entrar: <a href="/auth/login"> clic </a>	
-
+	<p id="backtoblog"><a href="http://www.esliceu.com/" title="Us heu perdut?">Torna cap a Es Liceu</a></p>
 	</div>
 
-</body>
+
+<div class="clear"></div>
+
+
+</body></html>
