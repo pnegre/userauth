@@ -77,4 +77,4 @@ def gootoken(request):
 
 	except Exception as e:
 		# Alguna cosa ha anat malament. Mostrar missatge d'error i link per tornar-ho a provar
-		return HttpResponse("Big Problem in Little China" + str(e))
+		return HttpResponseRedirect(settings.LOGIN_URL)
