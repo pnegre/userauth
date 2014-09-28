@@ -9,7 +9,7 @@ from django.contrib.auth import logout as log_out
 from django.conf import settings
 
 import urllib, urllib2
-import json
+import random, string, json, re
 
 
 def logout(request):
@@ -19,14 +19,19 @@ def logout(request):
 	} )
 
 def logingoogle2(request):
-	print request.session.session_key
+	rnd = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
+	ses = request.session
+	ses['goostate'] = rnd
+	ses.save()
 
-	s = 'https://accounts.google.com/o/oauth2/auth?' + 'scope=email%20profile&' + \
-		'redirect_uri=http%3A%2F%2Fappsproves.esliceu.com:8000%2Fauth%2Foauth2callback&' + \
-		'hd=esliceu.com&' + \
-		'response_type=token&' + \
-		'state=abc123&' + \
-		'client_id=' + settings.GOOGLECLIENTID
+	s = 'https://accounts.google.com/o/oauth2/auth?' + urllib.urlencode({
+		'redirect_uri': 'http://appsproves.esliceu.com:8000/auth/oauth2callback',
+		'scope': 'email profile',
+		'hd': 'esliceu.com',
+		'response_type': 'token',
+		'state': rnd,
+		'client_id': settings.GOOGLECLIENTID,
+	})
 
 	return HttpResponseRedirect(s)
 
@@ -41,14 +46,28 @@ def oauth2callback(request):
 
 # Rebem el token, i el validem contra google. La resposta ens donarà ja l'email de l'usuari,
 # entre d'altres paràmetres. Si hi ha excepció, és que ha fallat
-# TODO: Aquí veig un problema: si algú té accés a aquest "token", podrà entrar tranquil·lament suplantant l'identitat de l'usuari...
+# TODO: amb el wireshark mirar tot el tràfic que va passant. A veure si es pot veure la cookie i tot el demés...
 def gootoken(request):
-	access_token = request.GET.get('access_token')
+	try:
+		access_token = request.GET.get('access_token')
+		state = request.GET.get('state')
 
-	# Validem token
-	req = urllib2.urlopen('https://www.googleapis.com/oauth2/v1/tokeninfo', urllib.urlencode({'access_token': access_token }))
-	dataJson = json.loads(req.read())
-	email = dataJson['email']
+		# Validem token
+		req = urllib2.urlopen('https://www.googleapis.com/oauth2/v1/tokeninfo', urllib.urlencode({'access_token': access_token }))
+		dataJson = json.loads(req.read())
+		email = dataJson['email']
 
-	print "EMAIL: ", email
-	print dataJson
+		# Comprovem variable state
+		if state != request.session['goostate']:
+			raise Exception("State does not match")
+
+		# Comprovem email acaba en "esliceu.com"
+		if None == re.match('.*@esliceu.com$', email):
+			raise Exception("Email incorrect")
+
+		# Arribats aquí, podem fer ja el login... (com?)
+		return HttpResponse("OK")
+
+	except Exception as e:
+		# Alguna cosa ha anat malament. Mostrar missatge d'error i link per tornar-ho a provar
+		return HttpResponse("Big Problem in Little China")

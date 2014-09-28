@@ -13,7 +13,7 @@
         params[decodeURIComponent(m[1])] = decodeURIComponent(m[2]);
     }
 
-    window.location.replace("/auth/gootoken/?access_token=" + params['access_token']);
+    window.location.replace("/auth/gootoken/?access_token=" + params['access_token'] + '&' + 'state=' + params['state']);
 
     </script>
 
