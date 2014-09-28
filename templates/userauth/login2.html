@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" lang="ca"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+	<title>Es Liceu › Entra</title>
+<link rel="stylesheet" id="wp-admin-css" href="/static/userauth/wp-admin.css" type="text/css" media="all">
+<link rel="stylesheet" id="colors-fresh-css" href="/static/userauth/colors-fresh.css" type="text/css" media="all">
+<meta name="robots" content="noindex,nofollow">
+
+
+<style type="text/css">
+
+.login h1 {
+	text-align: center;
+	margin-bottom: 5px;
+}
+
+.error {
+	color: red;
+}
+
+</style>
+
+
+
+</head>
+<body class="login">
+
+
+<div id="login"><h1>
+
+	<img src="/static/userauth/logo_esliceu_alt.png">
+
+</h1>
+
+
+<form name="loginform" id="loginform" action="{% url django.contrib.auth.views.login %}" method="post">
+	{% csrf_token %}
+	<p>
+		<label for="user_login">Nom d'usuari<br>
+		<input type="text" name="username" id="user_login" class="input" value="" size="20" tabindex="10"></label>
+	</p>
+	<p>
+		<label for="user_pass">Contrasenya<br>
+		<input type="password" name="password" id="user_pass" class="input" value="" size="20" tabindex="20"></label>
+	</p>
+Entreu amb el vostre compte @esliceu.
+
+
+{% if form.errors %}
+	<br><br><p class="error">El nom d'usuari o la contrasenya no són correctes.</p>
+{% endif %}
+
+
+<br><br>	<p class="forgetmenot"><label for="rememberme"><input name="rememberme" type="checkbox" id="rememberme" value="forever" tabindex="90"> Recorda'm</label></p>
+
+	<p class="submit">
+		<input type="submit" name="wp-submit" id="wp-submit" class="button-primary" value="Entra" tabindex="100">
+		<input type="hidden" name="next" value="{{ next }}" />
+	</p>
+</form>
+
+
+	<p id="backtoblog"><a href="http://www.esliceu.com/" title="Us heu perdut?">Torna cap a Es Liceu</a></p>
+	</div>
+
+<div class="clear"></div>
+
+
+</body></html>
