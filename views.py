@@ -5,6 +5,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import simplejson
 
 from django.contrib.auth import logout as log_out
+from django.contrib.auth import login
+from django.contrib.auth.models import User, Group
 
 from django.conf import settings
 
@@ -43,6 +45,19 @@ def oauth2callback(request):
 		'userauth/oauth.html', { }
 	)
 
+def getOrCreateUser(username):
+	try:
+		user = User.objects.get(username=username)
+	except User.DoesNotExist:
+		user = User.objects.create_user(username,username,'')
+		user.set_unusable_password()
+		user.is_staff = False
+		user.is_superuser = False
+		user.save()
+
+	# TODO: very ugly hack. Django needs to set a backend...
+	user.backend = 'django.contrib.auth.backends.ModelBackend'
+	return user
 
 # Rebem el token, i el validem contra google. La resposta ens donarà ja l'email de l'usuari,
 # entre d'altres paràmetres. Si hi ha excepció, és que ha fallat
@@ -65,9 +80,12 @@ def gootoken(request):
 		if None == re.match('.*@esliceu.com$', email):
 			raise Exception("Email incorrect")
 
-		# Arribats aquí, podem fer ja el login... (com?)
-		return HttpResponse("OK")
+		# Arribats aquí, podem fer ja el login...
+		print "Fem login..."
+		user = getOrCreateUser(email)
+		login(request, user)
+		return HttpResponseRedirect(settings.LOGIN_REDIRECT_URL)
 
 	except Exception as e:
 		# Alguna cosa ha anat malament. Mostrar missatge d'error i link per tornar-ho a provar
-		return HttpResponse("Big Problem in Little China")
+		return HttpResponse("Big Problem in Little China" + str(e))
