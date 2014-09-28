@@ -2,42 +2,17 @@
 
 from django.contrib.auth.models import User, Group
 
-import re, urllib2, urllib
-
-# TODO: segur que això va per POST?????
-def checkEmail(email,password):
-	try:
-		if not re.match('.*\@esliceu.com',email):
-			return False
-		req = urllib2.urlopen('https://www.google.com/accounts/ClientLogin',urllib.urlencode({
-			'accountType': 'HOSTED',
-			'Email'      : email,
-			'Passwd'     : password,
-			'service'    : 'apps',
-		}))
-		return True
-	except:
-		return False
-
-
-
-class LiceuBackend:
-	def authenticate(self, username=None, password=None):
-		if not re.match('.*\@esliceu.com',username):
-			username = username + '@esliceu.com'
-			
-		if not checkEmail(username,password):
-			return None
-		
+class DummyBackend:
+	def authenticate(self, usernamemail=None):
 		try:
-			user = User.objects.get(username=username)
+			user = User.objects.get(username=usernamemail)
 		except User.DoesNotExist:
-			user = User.objects.create_user(username,username,'')
+			user = User.objects.create_user(usernamemail,usernamemail,'')
 			user.set_unusable_password()
 			user.is_staff = False
 			user.is_superuser = False
 			user.save()
-			
+
 		return user
 
 
