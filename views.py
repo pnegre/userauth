@@ -27,7 +27,7 @@ def logingoogle2(request):
 	ses.save()
 
 	s = 'https://accounts.google.com/o/oauth2/auth?' + urllib.urlencode({
-		'redirect_uri': 'http://appsproves.esliceu.com:8000/auth/oauth2callback',
+		'redirect_uri': 'https://apps.esliceu.com/auth/oauth2callback',
 		'scope': 'email profile',
 		'hd': 'esliceu.com',
 		'response_type': 'token',
