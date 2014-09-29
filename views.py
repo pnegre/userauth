@@ -28,6 +28,13 @@ def logingoogle2(request):
 	rnd = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
 	ses = request.session
 	ses['goostate'] = rnd
+
+	next = request.GET.get('next')
+	if next != None:
+		ses['mynext'] = next
+	else:
+		ses['mynext'] = None
+
 	ses.save()
 
 	s = 'https://accounts.google.com/o/oauth2/auth?' + urllib.urlencode({
@@ -77,7 +84,20 @@ def gootoken(request):
 
 		# TODO: potser faltaria cridar a "authenticate", amb un dummy backend...
 		login(request, user)
-		return HttpResponseRedirect(settings.LOGIN_REDIRECT_URL)
+
+		# Finalment, mirem si hi ha pendent la redirecció (next)
+		next = None
+		try:
+			next = request.session['mynext']
+		except:
+			pass
+
+		if next != None:
+			request.session['mynext'] = None
+			request.session.save()
+			return HttpResponseRedirect(next)
+		else:
+			return HttpResponseRedirect(settings.LOGIN_REDIRECT_URL)
 
 	except Exception as e:
 		# Alguna cosa ha anat malament. Mostrar missatge d'error i link per tornar-ho a provar

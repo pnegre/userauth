@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" lang="ca"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" lang="ca">
+
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 	<title>Es Liceu › Entra</title>
 <link rel="stylesheet" id="wp-admin-css" href="/static/userauth/wp-admin.css" type="text/css" media="all">
@@ -20,6 +22,44 @@
 
 </style>
 
+<!-- <script type="text/javascript" src="/static/userauth/jquery.js"></script> -->
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+<script type="text/javascript">
+
+function GetURLParameter(sParam)
+{
+    var sPageURL = window.location.search.substring(1);
+    var sURLVariables = sPageURL.split('&');
+    for (var i = 0; i < sURLVariables.length; i++)
+    {
+        var sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] == sParam)
+        {
+            return sParameterName[1];
+        }
+    }
+}
+
+
+
+$(document).ready(function() {
+	$(".alogin").click(function() {
+		var next = GetURLParameter("next");
+		var href = $(this).attr("href");
+		if (next) {
+			window.location.href=href + '?next=' + next
+		} else {
+			window.location.href=href
+		}
+		return false;
+	})
+
+});
+
+</script>
+
 
 
 </head>
@@ -37,11 +77,11 @@
 <form style="text-align: center">
 	Entreu amb el vostre compte @esliceu.
 	<p style="margin-bottom: 20px; margin-top: 5px;">
-		<a href="/auth/logingoogle2/"> <img src="/static/userauth/sign-in-with-google.png"> </a>
+		<a href="/auth/logingoogle2/" class="alogin"> <img src="/static/userauth/sign-in-with-google.png" id="googlogin"> </a>
 	</p>
 
 	<p>
-		<a href="/auth/loginexpert/"> <img src="/static/userauth/sign-in-admins.png"> </a>
+		<a href="/auth/loginexpert/" class="alogin"> <img src="/static/userauth/sign-in-admins.png"> </a>
 	</p>
 </form>
 
