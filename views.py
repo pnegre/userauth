@@ -20,6 +20,10 @@ def logout(request):
 		'userauth/logout.html', {
 	} )
 
+# Panell d'administració de OAUTH2 a google:
+# https://console.developers.google.com/project?authuser=0
+# Aquesta funció inicia l'autenticació amb google per OAUTH2, substituint l'anterior
+# que anava per ClientLogin (obsoleta, ja).
 def logingoogle2(request):
 	rnd = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
 	ses = request.session
