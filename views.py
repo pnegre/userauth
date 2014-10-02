@@ -38,10 +38,10 @@ def logingoogle2(request):
 	ses.save()
 
 	s = 'https://accounts.google.com/o/oauth2/auth?' + urllib.urlencode({
-		'redirect_uri': 'https://apps.esliceu.com/auth/oauth2callback',
+		'redirect_uri': 'http://appsproves.esliceu.com:8000/auth/oauth2callback',
 		'scope': 'email profile',
 		'hd': 'esliceu.com',
-		'response_type': 'token',
+		'response_type': 'code',
 		'state': rnd,
 		'client_id': settings.GOOGLECLIENTID,
 	})
@@ -49,20 +49,28 @@ def logingoogle2(request):
 	return HttpResponseRedirect(s)
 
 
-# Callback que és cridat per google, un cop l'usuari ha donat permís per usar el seu compte
-# Aquest, per javascript cridarà a /auth/gootoken, amb el token com a paràmetre
+# Google cridarà a /auth/oauth2callback i per GET enviarà el "code",
+# que serveix per obtenir el token (combinant-ho amb el SECRET de la consola de google).
+# També comprovarem "state", generat aleatòriament abans.
 def oauth2callback(request):
-	return render_to_response(
-		'userauth/oauth.html', { }
-	)
-
-# Rebem el token, i el validem contra google. La resposta ens donarà ja l'email de l'usuari,
-# entre d'altres paràmetres. Si hi ha excepció, és que ha fallat
-# TODO: amb el wireshark mirar tot el tràfic que va passant. A veure si es pot veure la cookie i tot el demés...
-def gootoken(request):
 	try:
-		access_token = request.GET.get('access_token')
 		state = request.GET.get('state')
+		code = request.GET.get('code')
+
+		# Comprovem variable state
+		if state != request.session['goostate']:
+			raise Exception("State does not match")
+
+		# Obtenim el token a partir del "code"
+		req = urllib2.urlopen('https://accounts.google.com/o/oauth2/token', urllib.urlencode({
+			'code': code,
+			'client_id': settings.GOOGLECLIENTID,
+			'client_secret': settings.GOOGLESECRET,
+			'grant_type': 'authorization_code',
+			'redirect_uri': 'http://appsproves.esliceu.com:8000/auth/oauth2callback',
+		}))
+		respJson = json.loads(req.read())
+		access_token = respJson['access_token']
 
 		# Validem token
 		req = urllib2.urlopen('https://www.googleapis.com/oauth2/v1/tokeninfo', urllib.urlencode({'access_token': access_token }))
@@ -82,11 +90,12 @@ def gootoken(request):
 			raise Exception("Email incorrect")
 
 		# Arribats aquí, podem fer ja el login...
+		# Autentiquem amb DummyBackend (per les keywords que passem a authenticate)
 		user = authenticate(usernamemail=email)
 		if user is None:
 			raise Exception("User auth error")
 
-		# TODO: potser faltaria cridar a "authenticate", amb un dummy backend...
+		# Es fa el login per django, un cop el backend ens ha autenticat
 		login(request, user)
 
 		# Finalment, mirem si hi ha pendent la redirecció (next)
@@ -105,4 +114,5 @@ def gootoken(request):
 
 	except Exception as e:
 		# Alguna cosa ha anat malament. Mostrar missatge d'error i link per tornar-ho a provar
+		# return HttpResponse("ERROR" + str(e))
 		return HttpResponseRedirect(settings.LOGIN_URL)

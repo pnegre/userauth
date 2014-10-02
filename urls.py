@@ -10,6 +10,6 @@ urlpatterns = patterns('',
 
 	(r'^logingoogle2/$', 'userauth.views.logingoogle2'),
 	(r'^oauth2callback/$', 'userauth.views.oauth2callback'),
-	(r'^gootoken/$', 'userauth.views.gootoken'),
+	# (r'^gootoken/$', 'userauth.views.gootoken'),
 
 )
