@@ -69,6 +69,10 @@ def gootoken(request):
 		dataJson = json.loads(req.read())
 		email = dataJson['email']
 
+		# Comprovem el clientID
+		if dataJson['audience'] != settings.GOOGLECLIENTID:
+			raise Exception("Client ID error")
+
 		# Comprovem variable state
 		if state != request.session['goostate']:
 			raise Exception("State does not match")
