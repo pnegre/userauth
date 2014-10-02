@@ -38,7 +38,7 @@ def logingoogle2(request):
 	ses.save()
 
 	s = 'https://accounts.google.com/o/oauth2/auth?' + urllib.urlencode({
-		'redirect_uri': 'http://appsproves.esliceu.com:8000/auth/oauth2callback',
+		'redirect_uri': 'https://apps.esliceu.com/auth/oauth2callback',
 		'scope': 'email profile',
 		'hd': 'esliceu.com',
 		'response_type': 'code',
@@ -67,7 +67,7 @@ def oauth2callback(request):
 			'client_id': settings.GOOGLECLIENTID,
 			'client_secret': settings.GOOGLESECRET,
 			'grant_type': 'authorization_code',
-			'redirect_uri': 'http://appsproves.esliceu.com:8000/auth/oauth2callback',
+			'redirect_uri': 'https://apps.esliceu.com/auth/oauth2callback',
 		}))
 		respJson = json.loads(req.read())
 		access_token = respJson['access_token']
