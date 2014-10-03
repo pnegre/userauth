@@ -13,6 +13,11 @@ from django.conf import settings
 import urllib, urllib2
 import random, string, json, re
 
+URI_GOOGLE_OAUTH1 =       'https://accounts.google.com/o/oauth2/auth'
+URI_REDIRECT =            'https://apps.esliceu.com/auth/oauth2callback'
+URI_GOOGLE_OBTAIN_TOKEN = 'https://accounts.google.com/o/oauth2/token'
+URI_GOOGLE_TOKENINFO =    'https://www.googleapis.com/oauth2/v1/tokeninfo'
+
 
 def logout(request):
 	log_out(request)
@@ -37,8 +42,8 @@ def logingoogle2(request):
 
 	ses.save()
 
-	s = 'https://accounts.google.com/o/oauth2/auth?' + urllib.urlencode({
-		'redirect_uri': 'https://apps.esliceu.com/auth/oauth2callback',
+	s = URI_GOOGLE_OAUTH1 + urllib.urlencode({
+		'redirect_uri': URI_REDIRECT,
 		'scope': 'email profile',
 		'hd': 'esliceu.com',
 		'response_type': 'code',
@@ -62,18 +67,20 @@ def oauth2callback(request):
 			raise Exception("State does not match")
 
 		# Obtenim el token a partir del "code"
-		req = urllib2.urlopen('https://accounts.google.com/o/oauth2/token', urllib.urlencode({
+		req = urllib2.urlopen(URI_GOOGLE_OBTAIN_TOKEN, urllib.urlencode({
 			'code': code,
 			'client_id': settings.GOOGLECLIENTID,
 			'client_secret': settings.GOOGLESECRET,
 			'grant_type': 'authorization_code',
-			'redirect_uri': 'https://apps.esliceu.com/auth/oauth2callback',
+			'redirect_uri': URI_REDIRECT,
 		}))
 		respJson = json.loads(req.read())
 		access_token = respJson['access_token']
 
 		# Validem token
-		req = urllib2.urlopen('https://www.googleapis.com/oauth2/v1/tokeninfo', urllib.urlencode({'access_token': access_token }))
+		req = urllib2.urlopen(URI_GOOGLE_TOKENINFO, urllib.urlencode({
+			'access_token': access_token
+		}))
 		dataJson = json.loads(req.read())
 		email = dataJson['email']
 
