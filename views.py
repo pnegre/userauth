@@ -42,7 +42,7 @@ def logingoogle2(request):
 
 	ses.save()
 
-	s = URI_GOOGLE_OAUTH1 + urllib.urlencode({
+	s = URI_GOOGLE_OAUTH1 + '?' + urllib.urlencode({
 		'redirect_uri': URI_REDIRECT,
 		'scope': 'email profile',
 		'hd': 'esliceu.com',
