@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 
+import datetime
+
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.backends import ModelBackend
+
+from userauth.models import *
 
 import re, urllib2, urllib
 
@@ -76,54 +80,49 @@ class ClientLoginBackend:
 			return None
 
 
+# Classe per limitar el nombre de logins, per evitar atacs de força bruta contra el servidor
+# provant totes les passwords possibles
+# TODO: el bloqueig s'hauria de fer per user i IP, no només per usuari...
 class RateLimitMixin(object):
 	"""
 	A mixin to enable rate-limiting in an existing authentication backend.
 	"""
 	cache_prefix = 'ratelimitbackend-'
-	minutes = 5
-	requests = 30
+	seconds = 120
+	requests = 3
 	username_key = 'username'
 
 	def authenticate(self, **kwargs):
-		print kwargs
 		request = kwargs.pop('request', None)
 		username = kwargs[self.username_key]
-		print username
+
+		try:
+			attempts = AuthLog.objects.filter(user=username).order_by('timestamp')
+			if len(attempts) > RateLimitMixin.requests:
+				delta = (datetime.datetime.now() - attempts[len(attempts)-RateLimitMixin.requests].timestamp).seconds
+				if delta < RateLimitMixin.seconds:
+					# Block the user, return None
+					return None
+
+		except Exception as e:
+			pass
+
 		user = super(RateLimitMixin, self).authenticate(**kwargs)
 		if user is None:
-			print "Fallo:", username
+			a = AuthLog(user=username, timestamp=datetime.datetime.now())
+			a.save()
 		else:
-			print "Success:", username
+			try:
+				# Hem aconseguit entrar correctament. Aleshores eliminem de la BBDD
+				# els intents fallats.
+				attempts = AuthLog.objects.filter(user=username)
+				attempts.delete()
+			except Exception as e:
+				pass
+
 
 		return user
-		# if request is not None:
-		#     counts = self.get_counters(request)
-		#     if sum(counts.values()) >= self.requests:
-		#         logger.warning(
-		#             u"Login rate-limit reached: username '{0}', IP {1}".format(
-		#                 username, self.get_ip(request),
-		#             )
-		#         )
-		#         raise RateLimitException('Rate-limit reached', counts)
-		# else:
-		#     warnings.warn(u"No request passed to the backend, unable to "
-		#                   u"rate-limit. Username was '%s'" % username,
-		#                   stacklevel=2)
 
-		# print user, request
-		# if user is None and request is not None:
-		# 	print "Fallo:", username, self.get_ip(request)
-
-			#     logger.info(
-			#         u"Login failed: username '{0}', IP {1}".format(
-			#             username,
-			#             self.get_ip(request),
-			#         )
-			#     )
-			#     cache_key = self.get_cache_key(request)
-			#     self.cache_incr(cache_key)
-		return user
-
+# Creem una nova classe, que hereda de RateLimitMixin i ModelBackend, que actuarà com a backend
 class RateLimitModelBackend(RateLimitMixin, ModelBackend):
 	pass
