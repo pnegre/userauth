@@ -95,6 +95,9 @@ class RateLimitMixin(object):
 	def authenticate(self, **kwargs):
 		request = kwargs.pop('request', None)
 		username = kwargs[self.username_key]
+		if re.match('.*\@esliceu.com',username):
+			# Si es tracta d'un login per google, passem
+			return None
 
 		try:
 			attempts = AuthLog.objects.filter(user=username).order_by('timestamp')
