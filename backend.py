@@ -87,8 +87,8 @@ class RateLimitMixin(object):
 	"""
 	A mixin to enable rate-limiting in an existing authentication backend.
 	"""
-	SECONDS = 120
-	REQUESTS = 3
+	SECONDS = 300  # Màxim 5 failed logins en 5 minuts
+	REQUESTS = 5
 
 	def authenticate(self, **kwargs):
 		request = kwargs.pop('request', None)
