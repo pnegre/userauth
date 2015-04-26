@@ -95,8 +95,9 @@ class RateLimitMixin(object):
 	def authenticate(self, **kwargs):
 		request = kwargs.pop('request', None)
 		username = kwargs[self.username_key]
+		# TODO: què passa quan fem login amb oauth2? El camp username està buit???? S'haurà de comprovar al servidor...
 		if re.match('.*\@esliceu.com',username):
-			# Si es tracta d'un login per google, passem
+			# Si es tracta d'un login per google (clientLogin), passem
 			return None
 
 		try:
