@@ -15,7 +15,6 @@ import re, urllib2, urllib
 # que l'usuari és correcte
 class DummyBackend:
 	def authenticate(self, usernamemail=None):
-		print "Cridat authenticate DUMMYBACKEND"
 		try:
 			user = User.objects.get(username=usernamemail)
 		except User.DoesNotExist:
@@ -56,7 +55,6 @@ class DummyBackend:
 # # Per ara el mantenim per facilitar la vida als usuaris...
 # class ClientLoginBackend:
 # 	def authenticate(self, username=None, password=None):
-# 		print "Cridat authenticate CLIENTLOGIN"
 # 		if not re.match('.*\@esliceu.com',username):
 # 			username = username + '@esliceu.com'
 #
@@ -89,15 +87,18 @@ class RateLimitMixin(object):
 	"""
 	A mixin to enable rate-limiting in an existing authentication backend.
 	"""
-	cache_prefix = 'ratelimitbackend-'
-	seconds = 120
-	requests = 3
-	username_key = 'username'
+	SECONDS = 120
+	REQUESTS = 3
 
 	def authenticate(self, **kwargs):
-		print "Cridat authenticate MODELBACKEND"
 		request = kwargs.pop('request', None)
-		username = kwargs[self.username_key]
+		username = None
+		try:
+			username = kwargs['username']
+		except:
+			# No tenim username
+			return None
+
 		# TODO: què passa quan fem login amb oauth2? El camp username està buit???? S'haurà de comprovar al servidor...
 		if re.match('.*\@esliceu.com',username):
 			# Si es tracta d'un login per google (clientLogin), passem
@@ -105,10 +106,11 @@ class RateLimitMixin(object):
 
 		try:
 			attempts = AuthLog.objects.filter(user=username).order_by('timestamp')
-			if len(attempts) > RateLimitMixin.requests:
-				delta = (datetime.datetime.now() - attempts[len(attempts)-RateLimitMixin.requests].timestamp).seconds
-				if delta < RateLimitMixin.seconds:
+			if len(attempts) > RateLimitMixin.REQUESTS:
+				delta = (datetime.datetime.now() - attempts[len(attempts)-RateLimitMixin.REQUESTS].timestamp).seconds
+				if delta < RateLimitMixin.SECONDS:
 					# Block the user, return None
+					# print "BLOCKED:", delta
 					return None
 
 		except Exception as e:
