@@ -7,25 +7,29 @@ from django.utils import simplejson
 from django.contrib.auth import logout as log_out
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.models import User, Group
-
 from django.contrib.auth.views import login as genericLogin
-
 from django.conf import settings
 
 import urllib, urllib2
 import random, string, json, re
+
+from ratelimit.decorators import ratelimit
 
 URI_GOOGLE_OAUTH1 =       'https://accounts.google.com/o/oauth2/auth'
 URI_REDIRECT =            'https://apps.esliceu.com/auth/oauth2callback'
 URI_GOOGLE_OBTAIN_TOKEN = 'https://accounts.google.com/o/oauth2/token'
 URI_GOOGLE_TOKENINFO =    'https://www.googleapis.com/oauth2/v1/tokeninfo'
 
+# Pantalla de login on es pot triar si entrem amb google o mitjançant
+# un usuari de la base de dades local (modelbackend)
 def mylogin(request):
 	return genericLogin(request, template_name='userauth/login.html')
 
+# La vista del login per usuari (modelbackend) la limitem mitjançant
+# el mòdul "ratelimit": https://github.com/jsocol/django-ratelimit
+@ratelimit(key='ip', rate='5/m', block=True)
 def mylogin2(request):
 	return genericLogin(request, template_name='userauth/login2.html')
-
 
 def logout(request):
 	log_out(request)
