@@ -27,7 +27,7 @@ def mylogin(request):
 
 # La vista del login per usuari (modelbackend) la limitem mitjançant
 # el mòdul "ratelimit": https://github.com/jsocol/django-ratelimit
-@ratelimit(key='ip', rate='5/m', block=True)
+@ratelimit(key='ip', rate='5/2m', block=True)
 def mylogin2(request):
 	return genericLogin(request, template_name='userauth/login2.html')
 
@@ -36,6 +36,10 @@ def logout(request):
 	return render_to_response(
 		'userauth/logout.html', {
 	} )
+
+# Vista per mostrar la pantalla de "superat el número d'intents màxims"
+def blockedWarning(request, exception):
+	return render_to_response('userauth/blocked.html')
 
 # Panell d'administració de OAUTH2 a google:
 # https://console.developers.google.com/project?authuser=0
