@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" lang="ca"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	
+
 	<title>Has sortit</title>
 <link rel="stylesheet" id="wp-admin-css" href="/static/userauth/wp-admin.css" type="text/css" media="all">
 <link rel="stylesheet" id="colors-fresh-css" href="/static/userauth/colors-fresh.css" type="text/css" media="all">
@@ -25,12 +25,12 @@
 </head>
 <body class="login">
 <div id="login"><h1>
-	
+
 	<img src="/static/userauth/logo_esliceu_alt.png">
-	
+
 </h1>
 
-<form name="loginform" id="loginform" action="{% url django.contrib.auth.views.login %}" method="post">
+<form name="loginform" id="loginform" action="{% url userauth.views.mylogin %}" method="post">
 	<p> Has sortit de la Intranet.</p>
 	<br><br>
 	<p> Si vols tornar a entrar, fes clic <a href="/auth/login">aquí</a></p>

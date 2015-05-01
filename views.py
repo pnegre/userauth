@@ -8,6 +8,8 @@ from django.contrib.auth import logout as log_out
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.models import User, Group
 
+from django.contrib.auth.views import login as genericLogin
+
 from django.conf import settings
 
 import urllib, urllib2
@@ -17,6 +19,12 @@ URI_GOOGLE_OAUTH1 =       'https://accounts.google.com/o/oauth2/auth'
 URI_REDIRECT =            'https://apps.esliceu.com/auth/oauth2callback'
 URI_GOOGLE_OBTAIN_TOKEN = 'https://accounts.google.com/o/oauth2/token'
 URI_GOOGLE_TOKENINFO =    'https://www.googleapis.com/oauth2/v1/tokeninfo'
+
+def mylogin(request):
+	return genericLogin(request, template_name='userauth/login.html')
+
+def mylogin2(request):
+	return genericLogin(request, template_name='userauth/login2.html')
 
 
 def logout(request):
