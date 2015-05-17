@@ -2,7 +2,7 @@
 
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.http import HttpResponse, HttpResponseRedirect
-from django.utils import simplejson
+# from django.utils import simplejson
 
 from django.contrib.auth import logout as log_out
 from django.contrib.auth import login, authenticate

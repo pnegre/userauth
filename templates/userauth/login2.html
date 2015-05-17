@@ -33,7 +33,7 @@
 </h1>
 
 
-<form name="loginform" id="loginform" action="{% url userauth.views.mylogin2 %}" method="post">
+<form name="loginform" id="loginform" action="{% url 'userauth.views.mylogin2' %}" method="post">
 	{% csrf_token %}
 	<p>
 		<label for="user_login">Nom d'usuari<br>
