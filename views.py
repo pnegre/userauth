@@ -2,7 +2,6 @@
 
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.http import HttpResponse, HttpResponseRedirect
-# from django.utils import simplejson
 
 from django.contrib.auth import logout as log_out
 from django.contrib.auth import login, authenticate
@@ -32,10 +31,9 @@ def mylogin2(request):
 	return genericLogin(request, template_name='userauth/login2.html')
 
 def logout(request):
-	log_out(request)
-	return render_to_response(
-		'userauth/logout.html', {
-	} )
+	if request.method == 'POST':
+		log_out(request)
+		return render_to_response('userauth/logout.html')
 
 # Vista per mostrar la pantalla de "superat el número d'intents màxims"
 def blockedWarning(request, exception):
