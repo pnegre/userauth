@@ -17,6 +17,11 @@ class DummyBackend:
 	def authenticate(self, usernamemail=None, realusername=None):
 		try:
 			user = User.objects.get(username=usernamemail)
+			if user.first_name == "" and user.last_name == "":
+				user.first_name = realusername[0]
+				user.last_name = realusername[1]
+				user.save()
+				
 		except User.DoesNotExist:
 			user = User.objects.create_user(usernamemail,usernamemail,'')
 			user.set_unusable_password()
