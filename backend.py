@@ -14,7 +14,7 @@ import re, urllib2, urllib
 # No hi ha problema, perquè quan es crida, amb oauth2 ja hem verificat
 # que l'usuari és correcte
 class DummyBackend:
-	def authenticate(self, usernamemail=None):
+	def authenticate(self, usernamemail=None, realusername=None):
 		try:
 			user = User.objects.get(username=usernamemail)
 		except User.DoesNotExist:
@@ -22,6 +22,7 @@ class DummyBackend:
 			user.set_unusable_password()
 			user.is_staff = False
 			user.is_superuser = False
+			user.first_name = realusername
 			user.save()
 
 		return user

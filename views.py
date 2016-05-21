@@ -126,7 +126,7 @@ def oauth2callback(request):
 
 		# Arribats aquí, podem fer ja el login...
 		# Autentiquem amb DummyBackend (per les keywords que passem a authenticate)
-		user = authenticate(usernamemail=email)
+		user = authenticate(usernamemail=email, realusername=userRealName)
 		if user is None:
 			raise Exception("User auth error")
 
