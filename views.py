@@ -15,9 +15,9 @@ import random, string, json, re
 from ratelimit.decorators import ratelimit
 
 URI_GOOGLE_OAUTH1 =       'https://accounts.google.com/o/oauth2/auth'
-URI_REDIRECT =            'https://apps.esliceu.com/auth/oauth2callback'
 URI_GOOGLE_OBTAIN_TOKEN = 'https://accounts.google.com/o/oauth2/token'
 URI_GOOGLE_TOKENINFO =    'https://www.googleapis.com/oauth2/v1/tokeninfo'
+URI_GOOGLE_PROFILE =      'https://www.googleapis.com/oauth2/v1/userinfo'
 
 # Pantalla de login on es pot triar si entrem amb google o mitjançant
 # un usuari de la base de dades local (modelbackend)
@@ -57,7 +57,7 @@ def logingoogle2(request):
 	ses.save()
 
 	s = URI_GOOGLE_OAUTH1 + '?' + urllib.urlencode({
-		'redirect_uri': URI_REDIRECT,
+		'redirect_uri': settings.GOOGLEREDIRECT,
 		'scope': 'email profile',
 		'hd': 'esliceu.com',
 		'response_type': 'code',
@@ -86,8 +86,9 @@ def oauth2callback(request):
 			'client_id': settings.GOOGLECLIENTID,
 			'client_secret': settings.GOOGLESECRET,
 			'grant_type': 'authorization_code',
-			'redirect_uri': URI_REDIRECT,
+			'redirect_uri': settings.GOOGLEREDIRECT,
 		}))
+
 		respJson = json.loads(req.read())
 		access_token = respJson['access_token']
 
@@ -97,6 +98,19 @@ def oauth2callback(request):
 		}))
 		dataJson = json.loads(req.read())
 		email = dataJson['email']
+
+		userRealName = "Unknown"
+		try:
+			req = urllib2.urlopen(URI_GOOGLE_PROFILE + "?" +
+				'alt=json&' +
+				'access_token=%s&' % (access_token) +
+				'userId=me'
+			)
+			djson2 = json.loads(req.read())
+			print "---- DATA2:", djson2
+			userRealName = djson2['name']
+		except Exception as e:
+			print e
 
 		# Comprovem el clientID
 		if dataJson['audience'] != settings.GOOGLECLIENTID:
