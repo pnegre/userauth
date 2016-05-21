@@ -107,7 +107,6 @@ def oauth2callback(request):
 				'userId': 'me',
 			}))
 			djson2 = json.loads(req.read())
-			print "---- DATA2:", djson2
 			userRealName = [ djson2['given_name'], djson2['family_name'] ]
 		except Exception as e:
 			pass
