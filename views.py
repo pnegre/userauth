@@ -99,18 +99,18 @@ def oauth2callback(request):
 		dataJson = json.loads(req.read())
 		email = dataJson['email']
 
-		userRealName = "Unknown"
+		userRealName = ["Unknown", "Unknown"]
 		try:
-			req = urllib2.urlopen(URI_GOOGLE_PROFILE + "?" +
-				'alt=json&' +
-				'access_token=%s&' % (access_token) +
-				'userId=me'
-			)
+			req = urllib2.urlopen(URI_GOOGLE_PROFILE + "?" + urllib.urlencode({
+				'alt': 'json',
+				'access_token': access_token,
+				'userId': 'me',
+			}))
 			djson2 = json.loads(req.read())
 			print "---- DATA2:", djson2
-			userRealName = djson2['name']
+			userRealName = [ djson2['given_name'], djson2['family_name'] ]
 		except Exception as e:
-			print e
+			pass
 
 		# Comprovem el clientID
 		if dataJson['audience'] != settings.GOOGLECLIENTID:

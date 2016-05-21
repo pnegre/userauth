@@ -22,7 +22,8 @@ class DummyBackend:
 			user.set_unusable_password()
 			user.is_staff = False
 			user.is_superuser = False
-			user.first_name = realusername
+			user.first_name = realusername[0]
+			user.last_name = realusername[1]
 			user.save()
 
 		return user
