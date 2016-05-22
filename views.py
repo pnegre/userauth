@@ -12,12 +12,16 @@ from django.conf import settings
 import urllib, urllib2
 import random, string, json, re
 
+from oauth2client import client
+
 from ratelimit.decorators import ratelimit
 
 URI_GOOGLE_OAUTH1 =       'https://accounts.google.com/o/oauth2/auth'
 URI_GOOGLE_OBTAIN_TOKEN = 'https://accounts.google.com/o/oauth2/token'
 URI_GOOGLE_TOKENINFO =    'https://www.googleapis.com/oauth2/v1/tokeninfo'
 URI_GOOGLE_PROFILE =      'https://www.googleapis.com/oauth2/v1/userinfo'
+
+flow = None
 
 # Pantalla de login on es pot triar si entrem amb google o mitjançant
 # un usuari de la base de dades local (modelbackend)
@@ -54,18 +58,32 @@ def logingoogle2(request):
 	else:
 		ses['mynext'] = None
 
+	flow = client.OAuth2WebServerFlow(
+		client_id=settings.GOOGLECLIENTID,
+		client_secret=settings.GOOGLESECRET,
+		scope="email profile",
+		redirect_uri=settings.GOOGLEREDIRECT
+	)
+
+	ses.flow = flow
 	ses.save()
 
-	s = URI_GOOGLE_OAUTH1 + '?' + urllib.urlencode({
-		'redirect_uri': settings.GOOGLEREDIRECT,
-		'scope': 'email profile',
-		'hd': 'esliceu.com',
-		'response_type': 'code',
-		'state': rnd,
-		'client_id': settings.GOOGLECLIENTID,
-	})
+	auth_uri = flow.step1_get_authorize_url()
+	return HttpResponseRedirect(auth_uri)
 
-	return HttpResponseRedirect(s)
+	#
+	#
+	#
+	# s = URI_GOOGLE_OAUTH1 + '?' + urllib.urlencode({
+	# 	'redirect_uri': settings.GOOGLEREDIRECT,
+	# 	'scope': 'email profile',
+	# 	'hd': 'esliceu.com',
+	# 	'response_type': 'code',
+	# 	'state': rnd,
+	# 	'client_id': settings.GOOGLECLIENTID,
+	# })
+	#
+	# return HttpResponseRedirect(s)
 
 
 # Google cridarà a /auth/oauth2callback i per GET enviarà el "code",
