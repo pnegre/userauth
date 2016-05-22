@@ -64,6 +64,18 @@ def logingoogle2(request):
 
 
 #
+# Torna un array amb la informació bàsica de l'usuari:
+# nom, llinatge i email
+#
+def getUserInfo(credentials):
+	http = httplib2.Http()
+	credentials.authorize(http)
+	resp, cont = http.request(URI_GOOGLE_PROFILE)
+	respJson = json.loads(cont)
+	return [ respJson['email'], respJson['given_name'], respJson['family_name'] ]
+
+
+#
 # Segon pas de autenticació OAUTH2
 # S'obté la informació del profile de l'usuari
 #
@@ -72,15 +84,9 @@ def oauth2callback(request):
 		code = request.GET.get('code')
 		flow = request.session['flow']
 		credentials = flow.step2_exchange(code)
+		email, given_name, family_name = getUserInfo(credentials)
 
-		http = httplib2.Http()
-		credentials.authorize(http)
-		resp, cont = http.request(URI_GOOGLE_PROFILE)
-		respJson = json.loads(cont)
-		email = respJson['email']
-		given_name = respJson['given_name']
-		family_name = respJson['family_name']
-
+		# Comprovem que el email és del liceu
 		if None == re.match('.*@esliceu.com$', email):
 			raise Exception("Email incorrect")
 
