@@ -10,6 +10,7 @@ from django.contrib.auth.views import login as genericLogin
 from django.conf import settings
 
 import urllib, urllib2
+import httplib2
 import random, string, json, re
 
 from oauth2client import client
@@ -20,8 +21,6 @@ URI_GOOGLE_OAUTH1 =       'https://accounts.google.com/o/oauth2/auth'
 URI_GOOGLE_OBTAIN_TOKEN = 'https://accounts.google.com/o/oauth2/token'
 URI_GOOGLE_TOKENINFO =    'https://www.googleapis.com/oauth2/v1/tokeninfo'
 URI_GOOGLE_PROFILE =      'https://www.googleapis.com/oauth2/v1/userinfo'
-
-flow = None
 
 # Pantalla de login on es pot triar si entrem amb google o mitjançant
 # un usuari de la base de dades local (modelbackend)
@@ -48,10 +47,7 @@ def blockedWarning(request, exception):
 # Aquesta funció inicia l'autenticació amb google per OAUTH2, substituint l'anterior
 # que anava per ClientLogin (obsoleta, ja).
 def logingoogle2(request):
-	rnd = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
 	ses = request.session
-	ses['goostate'] = rnd
-
 	next = request.GET.get('next')
 	if next != None:
 		ses['mynext'] = next
@@ -71,30 +67,53 @@ def logingoogle2(request):
 	auth_uri = flow.step1_get_authorize_url()
 	return HttpResponseRedirect(auth_uri)
 
-	#
-	#
-	#
-	# s = URI_GOOGLE_OAUTH1 + '?' + urllib.urlencode({
-	# 	'redirect_uri': settings.GOOGLEREDIRECT,
-	# 	'scope': 'email profile',
-	# 	'hd': 'esliceu.com',
-	# 	'response_type': 'code',
-	# 	'state': rnd,
-	# 	'client_id': settings.GOOGLECLIENTID,
-	# })
-	#
-	# return HttpResponseRedirect(s)
 
-
-# Google cridarà a /auth/oauth2callback i per GET enviarà el "code",
-# que serveix per obtenir el token (combinant-ho amb el SECRET de la consola de google).
-# També comprovarem "state", generat aleatòriament abans.
+# Segon pas de autenticació OAUTH2
+# S'obté la informació del profile de l'usuari
 def oauth2callback(request):
-	code = request.GET.get('code')
-	flow = request.session['flow']
-	credentials = flow.step2_exchange(code)
-	print credentials
+	try:
+		code = request.GET.get('code')
+		flow = request.session['flow']
+		credentials = flow.step2_exchange(code)
 
+		http = httplib2.Http()
+		credentials.authorize(http)
+		resp, cont = http.request(URI_GOOGLE_PROFILE)
+		respJson = json.loads(cont)
+		email = respJson['email']
+		given_name = respJson['given_name']
+		family_name = respJson['family_name']
+
+		if None == re.match('.*@esliceu.com$', email):
+			raise Exception("Email incorrect")
+
+		# Arribats aquí, podem fer ja el login...
+		# Autentiquem amb DummyBackend (per les keywords que passem a authenticate)
+		user = authenticate(usernamemail=email, realusername=[ given_name, family_name ])
+		if user is None:
+			raise Exception("User auth error")
+
+		# Es fa el login per django, un cop el backend ens ha autenticat
+		login(request, user)
+
+		# Finalment, mirem si hi ha pendent la redirecció (next)
+		next = None
+		try:
+			next = request.session['mynext']
+		except:
+			pass
+
+		if next != None:
+			request.session['mynext'] = None
+			request.session.save()
+			return HttpResponseRedirect(next)
+		else:
+			return HttpResponseRedirect(settings.LOGIN_REDIRECT_URL)
+
+	except Exception as e:
+		# Alguna cosa ha anat malament. Mostrar missatge d'error i link per tornar-ho a provar
+		# return HttpResponse("ERROR" + str(e))
+		return HttpResponseRedirect(settings.LOGIN_URL)
 
 
 
