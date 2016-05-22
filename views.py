@@ -9,17 +9,13 @@ from django.contrib.auth.models import User, Group
 from django.contrib.auth.views import login as genericLogin
 from django.conf import settings
 
-import urllib, urllib2
 import httplib2
-import random, string, json, re
+import json, re
 
 from oauth2client import client
 
 from ratelimit.decorators import ratelimit
 
-URI_GOOGLE_OAUTH1 =       'https://accounts.google.com/o/oauth2/auth'
-URI_GOOGLE_OBTAIN_TOKEN = 'https://accounts.google.com/o/oauth2/token'
-URI_GOOGLE_TOKENINFO =    'https://www.googleapis.com/oauth2/v1/tokeninfo'
 URI_GOOGLE_PROFILE =      'https://www.googleapis.com/oauth2/v1/userinfo'
 
 # Pantalla de login on es pot triar si entrem amb google o mitjançant
@@ -114,89 +110,3 @@ def oauth2callback(request):
 		# Alguna cosa ha anat malament. Mostrar missatge d'error i link per tornar-ho a provar
 		# return HttpResponse("ERROR" + str(e))
 		return HttpResponseRedirect(settings.LOGIN_URL)
-
-
-
-
-
-
-
-	#
-	# try:
-	# 	state = request.GET.get('state')
-	# 	code = request.GET.get('code')
-	#
-	# 	# Comprovem variable state
-	# 	if state != request.session['goostate']:
-	# 		raise Exception("State does not match")
-	#
-	# 	# Obtenim el token a partir del "code"
-	# 	req = urllib2.urlopen(URI_GOOGLE_OBTAIN_TOKEN, urllib.urlencode({
-	# 		'code': code,
-	# 		'client_id': settings.GOOGLECLIENTID,
-	# 		'client_secret': settings.GOOGLESECRET,
-	# 		'grant_type': 'authorization_code',
-	# 		'redirect_uri': settings.GOOGLEREDIRECT,
-	# 	}))
-	#
-	# 	respJson = json.loads(req.read())
-	# 	access_token = respJson['access_token']
-	#
-	# 	# Validem token
-	# 	req = urllib2.urlopen(URI_GOOGLE_TOKENINFO, urllib.urlencode({
-	# 		'access_token': access_token
-	# 	}))
-	# 	dataJson = json.loads(req.read())
-	# 	email = dataJson['email']
-	#
-	# 	userRealName = ["Unknown", "Unknown"]
-	# 	try:
-	# 		req = urllib2.urlopen(URI_GOOGLE_PROFILE + "?" + urllib.urlencode({
-	# 			'alt': 'json',
-	# 			'access_token': access_token,
-	# 			'userId': 'me',
-	# 		}))
-	# 		djson2 = json.loads(req.read())
-	# 		userRealName = [ djson2['given_name'], djson2['family_name'] ]
-	# 	except Exception as e:
-	# 		pass
-	#
-	# 	# Comprovem el clientID
-	# 	if dataJson['audience'] != settings.GOOGLECLIENTID:
-	# 		raise Exception("Client ID error")
-	#
-	# 	# Comprovem variable state
-	# 	if state != request.session['goostate']:
-	# 		raise Exception("State does not match")
-	#
-	# 	# Comprovem email acaba en "esliceu.com"
-	# 	if None == re.match('.*@esliceu.com$', email):
-	# 		raise Exception("Email incorrect")
-	#
-	# 	# Arribats aquí, podem fer ja el login...
-	# 	# Autentiquem amb DummyBackend (per les keywords que passem a authenticate)
-	# 	user = authenticate(usernamemail=email, realusername=userRealName)
-	# 	if user is None:
-	# 		raise Exception("User auth error")
-	#
-	# 	# Es fa el login per django, un cop el backend ens ha autenticat
-	# 	login(request, user)
-	#
-	# 	# Finalment, mirem si hi ha pendent la redirecció (next)
-	# 	next = None
-	# 	try:
-	# 		next = request.session['mynext']
-	# 	except:
-	# 		pass
-	#
-	# 	if next != None:
-	# 		request.session['mynext'] = None
-	# 		request.session.save()
-	# 		return HttpResponseRedirect(next)
-	# 	else:
-	# 		return HttpResponseRedirect(settings.LOGIN_REDIRECT_URL)
-	#
-	# except Exception as e:
-	# 	# Alguna cosa ha anat malament. Mostrar missatge d'error i link per tornar-ho a provar
-	# 	# return HttpResponse("ERROR" + str(e))
-	# 	return HttpResponseRedirect(settings.LOGIN_URL)
