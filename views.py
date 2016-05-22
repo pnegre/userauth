@@ -38,10 +38,9 @@ def logout(request):
 def blockedWarning(request, exception):
 	return render_to_response('userauth/blocked.html')
 
-# Panell d'administració de OAUTH2 a google:
-# https://console.developers.google.com/project?authuser=0
-# Aquesta funció inicia l'autenticació amb google per OAUTH2, substituint l'anterior
-# que anava per ClientLogin (obsoleta, ja).
+#
+# OAUTH2, primer pas
+#
 def logingoogle2(request):
 	ses = request.session
 	next = request.GET.get('next')
@@ -64,8 +63,10 @@ def logingoogle2(request):
 	return HttpResponseRedirect(auth_uri)
 
 
+#
 # Segon pas de autenticació OAUTH2
 # S'obté la informació del profile de l'usuari
+#
 def oauth2callback(request):
 	try:
 		code = request.GET.get('code')
