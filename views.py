@@ -96,6 +96,10 @@ def oauth2callback(request):
 		if user is None:
 			raise Exception("User auth error")
 
+		# Comprovem que l'usuari està marcat com a actiu
+		if not user.is_active:
+			raise Exception("User not active")
+
 		# Es fa el login per django, un cop el backend ens ha autenticat
 		login(request, user)
 
@@ -115,5 +119,5 @@ def oauth2callback(request):
 
 	except Exception as e:
 		# Alguna cosa ha anat malament. Mostrar missatge d'error i link per tornar-ho a provar
-		# return HttpResponse("ERROR" + str(e))
+		#return HttpResponse("ERROR" + str(e))
 		return HttpResponseRedirect(settings.LOGIN_URL)
