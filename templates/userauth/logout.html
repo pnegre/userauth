@@ -24,6 +24,15 @@
 
 </head>
 <body class="login">
+
+	<script>
+
+	// Sortir del compte google automàticament
+	window.location = 'http://accounts.google.com/logout?&continue=http://www.google.com';
+
+	</script>
+
+
 <div id="login"><h1>
 
 	<img src="/static/userauth/logo_esliceu_alt.png">
@@ -33,6 +42,7 @@
 <form name="loginform" id="loginform">
 	<p> Has sortit de la Intranet.</p>
 	<br><br>
+	<p> Surt del teu <a href="http://accounts.google.com/logout?&continue=http://www.google.com"> compte google </a> </p>
 	<p> Si vols tornar a entrar, fes clic <a href="/auth/login">aquí</a></p>
 </form>
 
