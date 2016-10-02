@@ -88,7 +88,7 @@ def oauth2callback(request):
 
 		# Comprovem que el email és del liceu
 		if None == re.match('.*@esliceu.com$', email):
-			raise Exception("Email incorrect")
+			raise Exception("Només són vàlides les credencials @esliceu")
 
 		# Arribats aquí, podem fer ja el login...
 		# Autentiquem amb DummyBackend (per les keywords que passem a authenticate)
@@ -120,4 +120,9 @@ def oauth2callback(request):
 	except Exception as e:
 		# Alguna cosa ha anat malament. Mostrar missatge d'error i link per tornar-ho a provar
 		#return HttpResponse("ERROR" + str(e))
-		return HttpResponseRedirect(settings.LOGIN_URL)
+		return render_to_response('userauth/error.html', { 'message': str(e)})
+		# return HttpResponseRedirect(settings.LOGIN_URL)
+
+# 
+# def loginError(request):
+# 	return render_to_response('userauth/error.html', { 'message': "hey"})
